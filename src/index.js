@@ -1,4 +1,26 @@
-// สร้างclassชื่อLibraryใช้จัดการหนังสือ
+// อดินันท์ สุวรรณโณชิน 1650708017
+// สร้าง Enum ไว้เก็บ Genre
+var Genre;
+(function (Genre) {
+    Genre["Fiction"] = "Fiction";
+    Genre["NonFiction"] = "Non-Fiction";
+    Genre["Science"] = "Science";
+    Genre["History"] = "History";
+    Genre["Action"] = "Action";
+    Genre["Comedy"] = "Comedy";
+    Genre["Thriller"] = "Thriller";
+    Genre["Romance"] = "Romance";
+    Genre["Drama"] = "Drama";
+    Genre["SuperHero"] = "SuperHero";
+    Genre["Horror"] = "Horror";
+})(Genre || (Genre = {}));
+// Attach functions to window object
+window.addBookToLibrary = addBookToLibrary;
+window.updateBookInLibrary = updateBookInLibrary;
+window.searchBookInLibrary = searchBookInLibrary;
+window.saveLibraryData = saveLibraryData;
+window.loadLibraryData = loadLibraryData;
+// สร้าง class ชื่อ Library ใช้จัดการหนังสือ(ไว้ใส่ฟังก์ชั่น)
 var Library = /** @class */ (function () {
     function Library() {
         this.books = [];
@@ -9,7 +31,7 @@ var Library = /** @class */ (function () {
     };
     Library.prototype.listBooks = function () {
         console.log("List of books in the library:");
-        this.books.forEach(function (book) { return console.log("- ".concat(book.title, " by ").concat(book.author)); });
+        this.books.forEach(function (book) { return console.log("- ".concat(book.title, " by ").concat(book.author, " (").concat(book.genre, ", ").concat(book.publishedYear, ")")); });
     };
     Library.prototype.searchBooks = function (field, value) {
         var results = this.books.filter(function (book) { return book[field] === value; });
@@ -17,7 +39,7 @@ var Library = /** @class */ (function () {
             console.log("Found: ".concat(results[0].title, " by ").concat(results[0].author));
         }
         else {
-            console.log("No book found with the given title.");
+            console.log("No book found with the given criteria.");
         }
     };
     Library.prototype.updateBook = function (id, updatedFields) {
@@ -40,33 +62,79 @@ var Library = /** @class */ (function () {
             console.log("Book with id ".concat(id, " not found for deletion."));
         }
     };
-    // สร้างฟังกืชั่นไว้ทดสอบระบบ
-    Library.prototype.testLibrary = function () {
-        // เพิ่มหนังสือ
-        this.addBook({ title: "To Kill a Mockingbird", author: "Harper Lee", genre: "Fiction", publishedYear: 1960, isAvailable: true, id: 3 });
-        this.addBook({ title: "1984", author: "George Orwell", genre: "Fiction", publishedYear: 1949, isAvailable: true, id: 1 });
-        this.addBook({ title: "A Brief History of Time", author: "Stephen Hawking", genre: "Science", publishedYear: 1988, isAvailable: true, id: 2 });
-        // แสดงหนังสือทั้งหมด
-        this.listBooks();
-        // ค้นหาหนังสือ
-        console.log("Search for a book by title:");
-        this.searchBooks("title", "1984");
-        // อัปเดตข้อมูลผู้แต่ง
-        console.log("Update a book's author:");
-        this.updateBook(1, { author: "Orwell" });
-        var updatedBook = this.searchBooks("id", 1);
-        // ลบหนังสือ
-        console.log("Delete a book from the library:");
-        this.deleteBook(2);
-        console.log("Current books in library after deletion:");
-        this.listBooks();
-        // ลบหนังสือที่ไม่อยู่ในลิสต์
-        console.log("Delete a non-existent book:");
-        var bookIdToDelete = 999;
-        this.deleteBook(bookIdToDelete);
+    // Save to localStorage instead of file
+    Library.prototype.saveToFile = function (filePath) {
+        localStorage.setItem('libraryData', JSON.stringify(this.books));
+        console.log("Library data saved to localStorage.");
+    };
+    // Load from localStorage instead of file
+    Library.prototype.loadFromFile = function (filePath) {
+        var data = localStorage.getItem('libraryData');
+        if (data) {
+            this.books = JSON.parse(data);
+            console.log("Library data loaded from localStorage.");
+            this.listBooks(); // Display loaded books
+        }
+        else {
+            console.log("No saved data found in localStorage.");
+        }
     };
     return Library;
 }());
-// สร้างตัวอย่างของLibraryและเรียกฟังก์ชันทดสอบ
-var libraryTest = new Library();
-libraryTest.testLibrary();
+// สร้างตัวอย่างของ Library และใช้งานฟังก์ชันต่าง ๆ โดยตรง
+// Instance of the library manager
+var libraryManager = new Library();
+// Function to add a book from the form
+function addBookToLibrary() {
+    var title = document.getElementById('add-title').value;
+    var author = document.getElementById('add-author').value;
+    var genre = document.getElementById('add-genre').value;
+    var publishedYear = parseInt(document.getElementById('add-year').value);
+    var bookId = libraryManager['books'].length + 1; // Auto increment ID
+    libraryManager.addBook({
+        title: title,
+        author: author,
+        genre: genre,
+        publishedYear: publishedYear,
+        isAvailable: true,
+        id: bookId
+    });
+    updateBookList();
+}
+// Function to update a book
+function updateBookInLibrary() {
+    var bookId = parseInt(document.getElementById('update-id').value);
+    var newAuthor = document.getElementById('update-author').value;
+    if (bookId && newAuthor) {
+        libraryManager.updateBook(bookId, { author: newAuthor });
+        updateBookList();
+    }
+}
+// Function to search for a book by title
+function searchBookInLibrary() {
+    var title = document.getElementById('search-title').value;
+    libraryManager.searchBooks('title', title);
+}
+// Function to update the book list on the page
+function updateBookList() {
+    var bookListElement = document.getElementById('book-list');
+    if (bookListElement) {
+        bookListElement.innerHTML = ''; // Clear previous list
+        libraryManager['books'].forEach(function (book) {
+            var listItem = document.createElement('li');
+            listItem.textContent = "".concat(book.title, " by ").concat(book.author, " (").concat(book.genre, ", ").concat(book.publishedYear, ")");
+            bookListElement.appendChild(listItem);
+        });
+    }
+}
+// Save data to file
+function saveLibraryData() {
+    libraryManager.saveToFile('library.json');
+}
+// Load data from file
+function loadLibraryData() {
+    libraryManager.loadFromFile('library.json');
+    updateBookList();
+}
+// Initial book list update
+updateBookList();

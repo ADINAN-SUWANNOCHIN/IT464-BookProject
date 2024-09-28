@@ -1,11 +1,10 @@
 {
   "compilerOptions": {
-      "target": "es2015",
-      "module": "commonjs",
-      "strict": true,
-      "esModuleInterop": true,
-      "skipLibCheck": true,
-      "forceConsistentCasingInFileNames": true,
-      "lib": ["es2015", "dom"] 
-  }
+      "target": "es6",           // เป้าหมายของ JavaScript ที่ต้องการ
+      "module": "commonjs",      // ใช้ CommonJS module
+      "strict": true,            // เปิดการตรวจสอบข้อผิดพลาดอย่างเข้มงวด
+      "esModuleInterop": true,   // เปิดใช้งานการใช้ import แบบ ES6
+      "skipLibCheck": true       // ข้ามการตรวจสอบไลบรารี
+  },
+  "include": ["src/**/*"]       // รวมไฟล์ TypeScript จากโฟลเดอร์ src
 }

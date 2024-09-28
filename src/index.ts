@@ -1,15 +1,39 @@
 // อดินันท์ สุวรรณโณชิน 1650708017
-// สร้างinterfaceกำหนดtype ของ Book 
+
+// สร้าง Enum ไว้เก็บ Genre
+enum Genre {
+    Fiction = "Fiction",
+    NonFiction = "Non-Fiction",
+    Science = "Science",
+    History = "History",
+    Action = "Action",
+    Comedy = "Comedy",
+    Thriller = "Thriller",
+    Romance = "Romance",
+    Drama = "Drama",
+    SuperHero = "SuperHero",
+    Horror = "Horror"
+}
+
+// สร้าง interface ชื่อ Book กำหนด โดยกำหนด type ต่างๆ 
 interface Book {
     title: string;
     author: string;
-    genre: string;
+    genre: Genre; // ใช้ Enum ที่สร้างขึ้น
     publishedYear: number;
     isAvailable: boolean;
     id: number;
 }
 
-// สร้างclassชื่อLibraryใช้จัดการหนังสือ
+// ประกาศให้ฟังก์ชั่นglobal
+(window as any).addBookToLibrary = addBookToLibrary;
+(window as any).updateBookInLibrary = updateBookInLibrary;
+(window as any).searchBookInLibrary = searchBookInLibrary;
+(window as any).saveLibraryData = saveLibraryData;
+(window as any).loadLibraryData = loadLibraryData;
+
+
+// สร้าง class ชื่อ Library ใช้จัดการหนังสือ(ไว้ใส่ฟังก์ชั่น)
 class Library {
     private books: Book[] = [];
 
@@ -20,7 +44,7 @@ class Library {
 
     listBooks(): void {
         console.log("List of books in the library:");
-        this.books.forEach(book => console.log(`- ${book.title} by ${book.author}`));
+        this.books.forEach(book => console.log(`- ${book.title} by ${book.author} (${book.genre}, ${book.publishedYear})`));
     }
 
     searchBooks(field: keyof Book, value: string | number): void {
@@ -28,7 +52,7 @@ class Library {
         if (results.length > 0) {
             console.log(`Found: ${results[0].title} by ${results[0].author}`);
         } else {
-            console.log("No book found with the given title.");
+            console.log("No book found with the given criteria.");
         }
     }
 
@@ -52,39 +76,88 @@ class Library {
         }
     }
 
-    // สร้างฟังกืชั่นไว้ทดสอบระบบ
-    testLibrary(): void {
+   //  เซฟที่ localStorage แทน
+    saveToFile(filePath: string): void {
+        localStorage.setItem('libraryData', JSON.stringify(this.books));
+        console.log(`Library data saved to localStorage.`);
+    }
 
-        // เพิ่มหนังสือ
-        this.addBook({ title: "To Kill a Mockingbird", author: "Harper Lee", genre: "Fiction", publishedYear: 1960, isAvailable: true, id: 3 });
-        this.addBook({ title: "1984", author: "George Orwell", genre: "Fiction", publishedYear: 1949, isAvailable: true, id: 1 });
-        this.addBook({ title: "A Brief History of Time", author: "Stephen Hawking", genre: "Science", publishedYear: 1988, isAvailable: true, id: 2 });
+    // โหลกจาก local storage
+    loadFromFile(filePath: string): void {
+        const data = localStorage.getItem('libraryData');
+        if (data) {
+            this.books = JSON.parse(data);
+            console.log(`Library data loaded from localStorage.`);
+            this.listBooks(); // Display loaded books
+        } else {
+            console.log("No saved data found in localStorage.");
+        }
+    }
 
-        // แสดงหนังสือทั้งหมด
-        this.listBooks();
+    
+}
 
-        // ค้นหาหนังสือ
-        console.log("Search for a book by title:");
-        this.searchBooks("title", "1984");
+// สร้างตัวอย่างของ Library และใช้งานฟังก์ชัน
+const libraryManager = new Library();
 
-        // อัปเดตข้อมูลผู้แต่ง
-        console.log("Update a book's author:");
-        this.updateBook(1, { author: "Orwell" });
-        const updatedBook = this.searchBooks("id", 1);
-        
-        // ลบหนังสือ
-        console.log("Delete a book from the library:");
-        this.deleteBook(2);
-        console.log("Current books in library after deletion:");
-        this.listBooks();
+function addBookToLibrary() {
+    const title = (document.getElementById('add-title') as HTMLInputElement).value;
+    const author = (document.getElementById('add-author') as HTMLInputElement).value;
+    const genre = (document.getElementById('add-genre') as HTMLSelectElement).value as Genre;
+    const publishedYear = parseInt((document.getElementById('add-year') as HTMLInputElement).value);
 
-        // ลบหนังสือที่ไม่อยู่ในลิสต์
-        console.log("Delete a non-existent book:");
-        const bookIdToDelete = 999;
-        this.deleteBook(bookIdToDelete);
+    const bookId = libraryManager['books'].length + 1; // Auto increment ID
+
+    libraryManager.addBook({
+        title,
+        author,
+        genre,
+        publishedYear,
+        isAvailable: true,
+        id: bookId
+    });
+
+    updateBookList();
+}
+
+function updateBookInLibrary() {
+    const bookId = parseInt((document.getElementById('update-id') as HTMLInputElement).value);
+    const newAuthor = (document.getElementById('update-author') as HTMLInputElement).value;
+
+    if (bookId && newAuthor) {
+        libraryManager.updateBook(bookId, { author: newAuthor });
+        updateBookList();
     }
 }
 
-// สร้างตัวอย่างของLibraryและเรียกฟังก์ชันทดสอบ
-const libraryTest = new Library();
-libraryTest.testLibrary();
+function searchBookInLibrary() {
+    const title = (document.getElementById('search-title') as HTMLInputElement).value;
+    libraryManager.searchBooks('title', title);
+}
+
+function updateBookList() {
+    const bookListElement = document.getElementById('book-list');
+    if (bookListElement) {
+        bookListElement.innerHTML = '';
+        libraryManager['books'].forEach(book => {
+            const listItem = document.createElement('li');
+            listItem.textContent = `${book.title} by ${book.author} (${book.genre}, ${book.publishedYear})`;
+            bookListElement.appendChild(listItem);
+        });
+    }
+}
+
+
+function saveLibraryData() {
+    libraryManager.saveToFile('library.json');
+}
+
+
+function loadLibraryData() {
+    libraryManager.loadFromFile('library.json');
+    updateBookList();
+}
+
+// แสดงผลคลังหนังสือ
+updateBookList();
+
