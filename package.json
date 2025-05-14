@@ -1,0 +1,15 @@
+{
+  "name": "it464-bookproject",
+  "version": "1.0.0",
+  "description": "A project for IT464 Book Management Application.",
+  "scripts": {
+    "build": "echo 'Add your build command here, e.g., webpack or tsc'",
+    "test": "echo 'Add your test command here, e.g., jest'"
+  },
+  "dependencies": {
+    "express": "^4.18.2" // Example dependency, add more as needed
+  },
+  "devDependencies": {
+    "jest": "^29.6.1" // Example dev dependency, add more as needed
+  }
+}
