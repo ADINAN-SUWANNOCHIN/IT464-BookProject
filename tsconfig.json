@@ -9,13 +9,3 @@
   },
   "include": ["src/**/*"]       // รวมไฟล์ TypeScript จากโฟลเดอร์ src
 }
-{
-  "name": "it464-bookproject",
-  "version": "1.0.0",
-  "scripts": {
-    "build": "echo 'Build script here'",
-    "test": "echo 'Test script here'"
-  },
-  "dependencies": {},
-  "devDependencies": {}
-}
